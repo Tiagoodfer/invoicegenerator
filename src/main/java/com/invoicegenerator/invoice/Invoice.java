@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,18 +26,18 @@ public class Invoice {
     @Column(name = "UUID")
     private UUID uuid;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "company_emitter_id")
     private EmitterCompany emitterCompany;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "company_recipient_id")
     private RecipientCompany recipientCompany;
+
 
     @Column(name = "dataCriacao")
     private LocalDateTime dataCriacao;
 
-    @NotNull
     @Column(name = "invoiceNumber")
     private String invoiceNumber;
 
@@ -46,19 +45,15 @@ public class Invoice {
     @JsonManagedReference
     private List<InvoiceItem> items;
 
-    @NotNull
     @Column(name = "comments")
     private String comments;
 
-    @NotNull
     @Column(name = "tax")
     private int tax;
 
-    @NotNull
     @Column(name = "taxRate")
     private int taxRate;
 
-    @NotNull
     @Column(name = "anotherValue")
     private int anotherValue;
 

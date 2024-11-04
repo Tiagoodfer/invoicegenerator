@@ -1,5 +1,6 @@
 package com.invoicegenerator.invoice.service;
 
+import com.invoicegenerator.address.Address;
 import com.invoicegenerator.invoice.Invoice;
 import com.invoicegenerator.invoice.InvoiceItem;
 import com.itextpdf.text.*;
@@ -28,7 +29,7 @@ public class InvoicePDFService {
         addRecipientDetails(document, invoice);
         addEmitterDetails(document, invoice);
         addItemsTable(document, invoice);
-        addSummaryTable(document, invoice); // Agora usa os valores já calculados
+        addSummaryTable(document, invoice);
         addCommentsSection(document, invoice);
         addCenteredRecipientDetails(document, invoice);
         addFooter(document);
@@ -82,7 +83,19 @@ public class InvoicePDFService {
     private void addRecipientDetails(Document document, Invoice invoice) throws DocumentException {
         Font normalFont = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
         document.add(new Paragraph(invoice.getRecipientCompany().getName(), normalFont));
-        document.add(new Paragraph(invoice.getRecipientCompany().getAddress(), normalFont));
+
+        Address recipientAddress = invoice.getRecipientCompany().getAddress();
+        if (recipientAddress != null) {
+            document.add(new Paragraph(recipientAddress.getAddressOne(), normalFont));
+            if (recipientAddress.getAddressTwo() != null) {
+                document.add(new Paragraph(recipientAddress.getAddressTwo(), normalFont));
+            }
+            document.add(new Paragraph(
+                    String.format("%s, %s %s", recipientAddress.getCity(), recipientAddress.getState(), recipientAddress.getPostCode()),
+                    normalFont
+            ));
+        }
+
         document.add(new Paragraph(invoice.getRecipientCompany().getPhoneNumber(), normalFont));
         document.add(new Paragraph(invoice.getRecipientCompany().getEmail(), normalFont));
         document.add(new Paragraph("\n"));
@@ -99,7 +112,7 @@ public class InvoicePDFService {
         BaseColor customBlue = new BaseColor(60, 76, 132);
 
         PdfPCell billToCell = new PdfPCell(new Phrase("BILL TO:", sectionFont));
-        billToCell.setBackgroundColor(customBlue); // Define o fundo para o azul #3c4c84
+        billToCell.setBackgroundColor(customBlue);
         billToCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         billToCell.setPadding(5f);
         billToTable.addCell(billToCell);
@@ -107,11 +120,22 @@ public class InvoicePDFService {
         document.add(billToTable);
 
         document.add(new Paragraph(invoice.getEmitterCompany().getName(), normalFont));
-        document.add(new Paragraph(invoice.getEmitterCompany().getAddress(), normalFont));
+
+        Address emitterAddress = invoice.getEmitterCompany().getAddress();
+        if (emitterAddress != null) {
+            document.add(new Paragraph(emitterAddress.getAddressOne(), normalFont));
+            if (emitterAddress.getAddressOne() != null) {
+                document.add(new Paragraph(emitterAddress.getAddressTwo(), normalFont));
+            }
+            document.add(new Paragraph(
+                    String.format("%s, %s %s", emitterAddress.getCity(), emitterAddress.getState(), emitterAddress.getPostCode()),
+                    normalFont
+            ));
+        }
+
         document.add(new Paragraph(invoice.getEmitterCompany().getPhoneNumber(), normalFont));
         document.add(new Paragraph("\n"));
     }
-
 
     private void addItemsTable(Document document, Invoice invoice) throws DocumentException {
         Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.WHITE);
@@ -148,7 +172,6 @@ public class InvoicePDFService {
         document.add(table);
     }
 
-
     private void addSummaryTable(Document document, Invoice invoice) throws DocumentException {
         Font headerFont = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
         Font normalFont = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
@@ -164,7 +187,6 @@ public class InvoicePDFService {
 
         float cellPadding = 4f;
 
-        // Usa os valores já calculados do Invoice
         PdfPCell subtotalLabel = new PdfPCell(new Phrase("SUBTOTAL", headerFont));
         PdfPCell subtotalValue = new PdfPCell(new Phrase(currencyFormat.format(invoice.getSubtotal()), normalFont));
         subtotalValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -215,7 +237,6 @@ public class InvoicePDFService {
         document.add(summaryTable);
     }
 
-
     private void addCommentsSection(Document document, Invoice invoice) throws DocumentException {
         Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
         Font normalFont = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
@@ -238,10 +259,19 @@ public class InvoicePDFService {
     private void addCenteredRecipientDetails(Document document, Invoice invoice) throws DocumentException {
         Font normalFont = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
 
+        Address recipientAddress = invoice.getRecipientCompany().getAddress();
+        String addressDetails = recipientAddress != null ? String.format(
+                "%s, %s, %s %s",
+                recipientAddress.getAddressOne(),
+                recipientAddress.getCity(),
+                recipientAddress.getState(),
+                recipientAddress.getPostCode()
+        ) : "";
+
         Paragraph recipientDetails = new Paragraph(
-                String.format("%s, %s | %s | %s",
+                String.format("%s | %s | %s | %s",
                         invoice.getRecipientCompany().getName(),
-                        invoice.getRecipientCompany().getAddress(),
+                        addressDetails,
                         invoice.getRecipientCompany().getPhoneNumber(),
                         invoice.getRecipientCompany().getEmail()
                 ),
@@ -254,7 +284,7 @@ public class InvoicePDFService {
     private void addFooter(Document document) throws DocumentException {
         Font footerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.ITALIC);
         Paragraph footer = new Paragraph("Thank You For Your Business!", footerFont);
-        footer.setSpacingBefore(5f); // Ajuste o espaçamento aqui, se necessário
+        footer.setSpacingBefore(5f);
         footer.setAlignment(Element.ALIGN_CENTER);
         document.add(footer);
     }
