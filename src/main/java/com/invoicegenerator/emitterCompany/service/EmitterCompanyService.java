@@ -55,5 +55,4 @@ public class EmitterCompanyService {
         return emitterCompanyRepository.save(existingEmitterCompany);
     }
 
-
 }

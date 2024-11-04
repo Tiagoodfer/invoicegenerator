@@ -37,6 +37,6 @@ public class Address {
     @Column(name = "postCode")
     private String postCode;
 
-    // Colocar Pais
-
+    @Column(name = "country")
+    private String country;
 }

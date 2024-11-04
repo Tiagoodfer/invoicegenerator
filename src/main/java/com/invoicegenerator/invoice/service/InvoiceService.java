@@ -74,11 +74,9 @@ public class InvoiceService {
     }
 
     public Invoice update(UUID uuid, Invoice updateInvoice) {
-        // Verificar se a Invoice existe
         Invoice existingInvoice = invoiceRepository.findById(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found"));
 
-        // Buscar e setar a EmitterCompany e RecipientCompany atualizadas
         UUID emitterCompanyId = updateInvoice.getEmitterCompany().getUuid();
         UUID recipientCompanyId = updateInvoice.getRecipientCompany().getUuid();
 
@@ -90,14 +88,12 @@ public class InvoiceService {
         existingInvoice.setEmitterCompany(emitterCompany);
         existingInvoice.setRecipientCompany(recipientCompany);
 
-        // Atualizar os campos da Invoice
         existingInvoice.setInvoiceNumber(updateInvoice.getInvoiceNumber());
         existingInvoice.setComments(updateInvoice.getComments());
         existingInvoice.setTax(updateInvoice.getTax());
         existingInvoice.setTaxRate(updateInvoice.getTaxRate());
         existingInvoice.setAnotherValue(updateInvoice.getAnotherValue());
 
-        // Atualizar os items da Invoice sem duplicar
         Map<UUID, InvoiceItem> existingItemsMap = existingInvoice.getItems().stream()
                 .collect(Collectors.toMap(InvoiceItem::getUuid, item -> item));
 
@@ -106,28 +102,19 @@ public class InvoiceService {
             InvoiceItem existingItem = existingItemsMap.get(newItem.getUuid());
 
             if (existingItem != null) {
-                // Atualiza os dados do item existente
                 existingItem.setDescription(newItem.getDescription());
                 existingItem.setUnitPrice(newItem.getUnitPrice());
                 updatedItems.add(existingItem);
             } else {
-                // Adiciona o novo item, associando-o à fatura existente
                 newItem.setInvoice(existingInvoice);
                 updatedItems.add(newItem);
             }
         }
 
         existingInvoice.setItems(updatedItems);
-
-        // Recalcula os valores da fatura
         sumInvoiceValues(existingInvoice);
-
-        // Salva as alterações
         return invoiceRepository.save(existingInvoice);
     }
-
-
-
 
     public Invoice getInvoiceById(UUID id) {
         Optional<Invoice> invoice = invoiceRepository.findById(id);

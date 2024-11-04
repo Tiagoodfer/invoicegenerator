@@ -91,7 +91,11 @@ public class InvoicePDFService {
                 document.add(new Paragraph(recipientAddress.getAddressTwo(), normalFont));
             }
             document.add(new Paragraph(
-                    String.format("%s, %s %s", recipientAddress.getCity(), recipientAddress.getState(), recipientAddress.getPostCode()),
+                    String.format("%s, %s %s, %s",
+                            recipientAddress.getCity(),
+                            recipientAddress.getState(),
+                            recipientAddress.getPostCode(),
+                            recipientAddress.getCountry()),
                     normalFont
             ));
         }
@@ -124,11 +128,15 @@ public class InvoicePDFService {
         Address emitterAddress = invoice.getEmitterCompany().getAddress();
         if (emitterAddress != null) {
             document.add(new Paragraph(emitterAddress.getAddressOne(), normalFont));
-            if (emitterAddress.getAddressOne() != null) {
+            if (emitterAddress.getAddressTwo() != null) {
                 document.add(new Paragraph(emitterAddress.getAddressTwo(), normalFont));
             }
             document.add(new Paragraph(
-                    String.format("%s, %s %s", emitterAddress.getCity(), emitterAddress.getState(), emitterAddress.getPostCode()),
+                    String.format("%s, %s %s, %s",
+                            emitterAddress.getCity(),
+                            emitterAddress.getState(),
+                            emitterAddress.getPostCode(),
+                            emitterAddress.getCountry()),
                     normalFont
             ));
         }
@@ -261,11 +269,12 @@ public class InvoicePDFService {
 
         Address recipientAddress = invoice.getRecipientCompany().getAddress();
         String addressDetails = recipientAddress != null ? String.format(
-                "%s, %s, %s %s",
+                "%s, %s, %s %s, %s",
                 recipientAddress.getAddressOne(),
                 recipientAddress.getCity(),
                 recipientAddress.getState(),
-                recipientAddress.getPostCode()
+                recipientAddress.getPostCode(),
+                recipientAddress.getCountry()
         ) : "";
 
         Paragraph recipientDetails = new Paragraph(
