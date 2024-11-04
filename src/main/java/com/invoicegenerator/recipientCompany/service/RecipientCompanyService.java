@@ -54,5 +54,4 @@ public class RecipientCompanyService {
         return recipientCompanyRepository.save(existingRecipientCompany);
     }
 
-
 }
