@@ -1,11 +1,11 @@
 package com.invoicegenerator.emitterCompany;
 
+import com.invoicegenerator.address.Address;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.UUID;
 
@@ -22,19 +22,16 @@ public class EmitterCompany {
     @Column(name = "UUID")
     private UUID uuid;
 
-    @NotNull
     @Column(name = "name")
     private String name;
 
-    @NotNull
-    @Column(name = "address")
-    private String address;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id") // Aqui o nome da coluna no banco de dados será "address_id"
+    private Address address;
 
-    @NotNull
     @Column(name = "phoneNumber")
     private String phoneNumber;
 
-    @NotNull
     @Column(name = "email")
     private String email;
 

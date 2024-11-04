@@ -1,7 +1,9 @@
 package com.invoicegenerator.recipientCompany.service;
 
+import com.invoicegenerator.address.Address;
 import com.invoicegenerator.recipientCompany.RecipientCompany;
 import com.invoicegenerator.recipientCompany.repository.RecipientCompanyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,13 +29,30 @@ public class RecipientCompanyService {
     }
 
     public RecipientCompany update(UUID uuid, RecipientCompany updateRecipientCompany) {
-        RecipientCompany upRecipientCompany = recipientCompanyRepository.findById(uuid).get();
+        RecipientCompany existingRecipientCompany = recipientCompanyRepository.findById(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("RecipientCompany not found"));
 
-        upRecipientCompany.setName(updateRecipientCompany.getName());
-        upRecipientCompany.setAddress(updateRecipientCompany.getAddress());
-        upRecipientCompany.setPhoneNumber(updateRecipientCompany.getPhoneNumber());
-        upRecipientCompany.setEmail(updateRecipientCompany.getEmail());
-        return recipientCompanyRepository.save(upRecipientCompany);
+        existingRecipientCompany.setName(updateRecipientCompany.getName());
+        existingRecipientCompany.setPhoneNumber(updateRecipientCompany.getPhoneNumber());
+        existingRecipientCompany.setEmail(updateRecipientCompany.getEmail());
+
+        Address updatedAddress = updateRecipientCompany.getAddress();
+        if (updatedAddress != null) {
+            Address currentAddress = existingRecipientCompany.getAddress();
+
+            if (currentAddress != null) {
+                currentAddress.setAddressOne(updatedAddress.getAddressOne());
+                currentAddress.setAddressTwo(updatedAddress.getAddressTwo());
+                currentAddress.setCity(updatedAddress.getCity());
+                currentAddress.setState(updatedAddress.getState());
+                currentAddress.setPostCode(updatedAddress.getPostCode());
+            } else {
+                existingRecipientCompany.setAddress(updatedAddress);
+            }
+        }
+
+        return recipientCompanyRepository.save(existingRecipientCompany);
     }
+
 
 }
