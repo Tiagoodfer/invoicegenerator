@@ -8,6 +8,7 @@ public class InvoiceGeneratorApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(InvoiceGeneratorApplication.class, args);
+
 	}
 
 }
