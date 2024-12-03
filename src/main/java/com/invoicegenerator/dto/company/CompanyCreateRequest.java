@@ -25,9 +25,9 @@ public class CompanyCreateRequest {
     private String email;
 
     @NotNull
-    private AddressDTO addressDTO;
+    private AddressDTO address;
 
     @NotNull
-    private UserCompanyDTO userCompanyDTO;
+    private UserCompanyDTO userCompany;
 
 }
