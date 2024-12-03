@@ -9,10 +9,10 @@ import com.invoicegenerator.dto.company.CompanyResponse;
 import com.invoicegenerator.dto.company.CompanyUpdateRequest;
 import com.invoicegenerator.dto.company.address.AddressDTO;
 import com.invoicegenerator.dto.usercompany.UserCompanyDTO;
+import com.invoicegenerator.exceptions.ResourceNotFoundException;
 import com.invoicegenerator.repository.CompanyRepository;
 import com.invoicegenerator.repository.UserCompanyRepository;
 import com.invoicegenerator.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,13 +35,18 @@ public class CompanyService {
 
     @Transactional
     public CompanyResponse create(CompanyCreateRequest companyRequest) {
+
         UserCompany userCompany = new UserCompany();
-        UUID userId = companyRequest.getUserCompanyDTO().getUserId();
+
+        UUID userId = companyRequest.getUserCompany().getUserId();
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    return new ResourceNotFoundException("User not found with ID: " + userId);
+                });
 
         userCompany.setUser(user);
-        userCompany.setOwner(companyRequest.getUserCompanyDTO().isOwner());
+        userCompany.setOwner(companyRequest.getUserCompany().isOwner());
         UserCompany savedUserCompany = userCompanyRepository.save(userCompany);
 
         Company company = toCompany(companyRequest);
@@ -65,14 +70,14 @@ public class CompanyService {
     @Transactional
     public void delete(UUID companyId) {
         Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
         companyRepository.delete(company);
     }
 
     @Transactional
     public CompanyResponse update(UUID companyId, CompanyUpdateRequest companyRequest) {
         Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
         company.setName(companyRequest.getName());
         company.setPhoneNumber(companyRequest.getPhoneNumber());
@@ -101,7 +106,7 @@ public class CompanyService {
         company.setName(companyRequest.getName());
         company.setPhoneNumber(companyRequest.getPhoneNumber());
         company.setEmail(companyRequest.getEmail());
-        company.setAddress(toAddress(companyRequest.getAddressDTO()));
+        company.setAddress(toAddress(companyRequest.getAddress()));
         return company;
     }
 
